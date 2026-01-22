@@ -1,21 +1,24 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import gdown
 import os
+import requests
 
 # ----------------------------
-# Google Drive file settings
+# Model download settings
 # ----------------------------
-file_id = "1z3dYkabmBgpWO8ip6wNJYPhw-h_6zMPf"
 pkl_path = "rf_defect_pipeline.pkl"
+MODEL_URL = "https://drive.google.com/uc?id=1z3dYkabmBgpWO8ip6wNJYPhw-h_6zMPf"
 
-# Download model if not exists
+# Download the model if it does not exist
 if not os.path.exists(pkl_path):
-    url = f"https://drive.google.com/uc?id={file_id}"
-    gdown.download(url, pkl_path, quiet=False)
+    st.info("Downloading model, please wait...")
+    r = requests.get(MODEL_URL)
+    with open(pkl_path, "wb") as f:
+        f.write(r.content)
+    st.success("Model downloaded successfully!")
 
-# Load single pipeline (model + scaler + features)
+# Load pipeline (model + scaler + features)
 pipeline, features = joblib.load(pkl_path)
 
 # ----------------------------
@@ -49,9 +52,14 @@ values = [
     st.number_input("Branch Count", 0.0),
 ]
 
+# ----------------------------
 # Prediction
+# ----------------------------
 if st.button("Predict"):
+    # Create DataFrame with proper feature order
     df = pd.DataFrame([values], columns=features)
+
+    # Make prediction
     pred = pipeline.predict(df)[0]
     prob = pipeline.predict_proba(df)[0][1]
 
