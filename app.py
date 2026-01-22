@@ -18,8 +18,16 @@ if not os.path.exists(pkl_path):
         f.write(r.content)
     st.success("Model downloaded successfully!")
 
-# Load pipeline (model + scaler + features)
-pipeline, features = joblib.load(pkl_path)
+# Load pipeline
+pipeline = joblib.load(pkl_path)
+
+# Define features manually in the same order used in training
+features = [
+    "loc", "vg", "evg", "ivg", "n", "v", "l", "d", "i", "e",
+    "b", "t", "logical_loc", "logical_comments", "logical_blank",
+    "loc_code_comment", "unique_operators", "unique_operands",
+    "total_operators", "total_operands", "branch_count"
+]
 
 # ----------------------------
 # Streamlit UI
@@ -56,7 +64,7 @@ values = [
 # Prediction
 # ----------------------------
 if st.button("Predict"):
-    # Create DataFrame with proper feature order
+    # Create DataFrame with correct feature order
     df = pd.DataFrame([values], columns=features)
 
     # Make prediction
